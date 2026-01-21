@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=3840, height=2160">
+    <title>Looking Ahead 2026 - Dashboard de Vendas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #16161f;
+            --accent-cyan: #00d4aa;
+            --accent-cyan-dim: rgba(0, 212, 170, 0.15);
+            --accent-magenta: #ff3d8a;
+            --accent-orange: #ff8c42;
+            --accent-blue: #4da6ff;
+            --accent-gold: #ffd700;
+            --accent-green: #00ff88;
+            --text-primary: #ffffff;
+            --text-secondary: #8b8b9e;
+            --text-muted: #5a5a6e;
+            --border-color: rgba(255,255,255,0.06);
+            --glow-cyan: 0 0 40px rgba(0, 212, 170, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 20% 0%, rgba(0, 212, 170, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 61, 138, 0.06) 0%, transparent 50%);
+        }
+
+        .dashboard {
+            width: 100vw;
+            height: 100vh;
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-template-rows: auto 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logo {
+            font-family: 'Sora', sans-serif;
+            font-weight: 800;
+            font-size: 42px;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-magenta) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+
+        .event-badge {
+            background: var(--accent-cyan-dim);
+            border: 1px solid var(--accent-cyan);
+            padding: 8px 20px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .live-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .clock {
+            font-family: 'Space Mono', monospace;
+            font-size: 28px;
+            color: var(--text-secondary);
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .kpi-card:hover::before {
+            opacity: 1;
+        }
+
+        .kpi-card.highlight {
+            background: linear-gradient(135deg, rgba(0,212,170,0.1) 0%, rgba(255,61,138,0.1) 100%);
+            border-color: var(--accent-cyan);
+        }
+
+        .kpi-card.highlight::before {
+            opacity: 1;
+        }
+
+        .kpi-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 42px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .kpi-value.cyan { color: var(--accent-cyan); }
+        .kpi-value.magenta { color: var(--accent-magenta); }
+        .kpi-value.gold { color: var(--accent-gold); }
+        .kpi-value.green { color: var(--accent-green); }
+
+        .kpi-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* Charts Section */
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chart-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Bar Chart Styles */
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .bar-label {
+            width: 120px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 36px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            transition: width 1s ease-out;
+        }
+
+        .bar-fill.cyan {
+            background: linear-gradient(90deg, var(--accent-cyan), rgba(0,212,170,0.7));
+        }
+
+        .bar-fill.magenta {
+            background: linear-gradient(90deg, var(--accent-magenta), rgba(255,61,138,0.7));
+        }
+
+        .bar-fill.gold {
+            background: linear-gradient(90deg, var(--accent-gold), rgba(255,215,0,0.7));
+        }
+
+        .bar-fill.blue {
+            background: linear-gradient(90deg, var(--accent-blue), rgba(77,166,255,0.7));
+        }
+
+        .bar-fill.orange {
+            background: linear-gradient(90deg, var(--accent-orange), rgba(255,140,66,0.7));
+        }
+
+        /* Lotes Grid */
+        .lotes-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .lote-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .lote-item:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: var(--accent-cyan);
+        }
+
+        .lote-name {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .lote-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        /* Tipo Grid */
+        .tipo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .tipo-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .tipo-name {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .tipo-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .tipo-value.cyan { color: var(--accent-cyan); }
+        .tipo-value.magenta { color: var(--accent-magenta); }
+        .tipo-value.gold { color: var(--accent-gold); }
+        .tipo-value.blue { color: var(--accent-blue); }
+        .tipo-value.orange { color: var(--accent-orange); }
+        .tipo-value.green { color: var(--accent-green); }
+
+        /* Two Column Layout */
+        .col-span-2 {
+            grid-column: span 2;
+        }
+
+        /* ROI Display */
+        .roi-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .roi-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 72px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-orange) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .roi-label {
+            font-size: 24px;
+            color: var(--text-secondary);
+        }
+
+        /* Divider Stats */
+        .divider-stats {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            margin-top: 16px;
+        }
+
+        .divider-stat {
+            text-align: center;
+        }
+
+        .divider-stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .divider-stat-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* Progress Ring */
+        .progress-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .progress-ring-container {
+            position: relative;
+            width: 160px;
+            height: 160px;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-bg {
+            fill: none;
+            stroke: rgba(255,255,255,0.1);
+            stroke-width: 12;
+        }
+
+        .progress-ring-fill {
+            fill: none;
+            stroke: url(#gradient);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 408;
+            stroke-dashoffset: 408;
+            animation: progressFill 2s ease-out forwards;
+        }
+
+        @keyframes progressFill {
+            to { stroke-dashoffset: 28; }
+        }
+
+        .progress-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-percent {
+            font-family: 'Space Mono', monospace;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .progress-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .progress-info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .progress-info-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .progress-info-dot.cyan { background: var(--accent-cyan); }
+        .progress-info-dot.magenta { background: var(--accent-magenta); }
+
+        .progress-info-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .progress-info-value {
+            font-family: 'Space Mono', monospace;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        .footer {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .v4-logo {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--accent-cyan);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo">LOOKING AHEAD 2026</div>
+                <div class="event-badge">Dashboard de Vendas</div>
+            </div>
+            <div class="header-right">
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span>DADOS EM TEMPO REAL</span>
+                </div>
+                <div class="clock" id="clock">00:00:00</div>
+            </div>
+        </header>
+
+        <!-- KPI Cards Row -->
+        <div class="kpi-card highlight">
+            <div class="kpi-label">Faturamento Total</div>
+            <div class="kpi-value cyan">R$ 1.723.272</div>
+            <div class="kpi-subtitle">+R$ 88K vs última atualização</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">Cadeiras Vendidas</div>
+            <div class="kpi-value">2.425</div>
+            <div class="kpi-subtitle">Meta: 2.500 cadeiras</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">Total de Vendas</div>
+            <div class="kpi-value magenta">1.286</div>
+            <div class="kpi-subtitle">Compradores únicos</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">CPV Estimado</div>
+            <div class="kpi-value green">R$ 2.409</div>
+            <div class="kpi-subtitle">Custo por venda</div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="chart-card col-span-2">
+            <div class="chart-title">Faturamento por Evento</div>
+            <div class="chart-content">
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-label">Interno</div>
+                        <div class="bar-container">
+                            <div class="bar-fill cyan" style="width: 87%;">R$ 1.496.289</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Externo</div>
+                        <div class="bar-container">
+                            <div class="bar-fill magenta" style="width: 13%;">R$ 226.982</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="divider-stats">
+                    <div class="divider-stat">
+                        <div class="divider-stat-label">Cadeiras Interno</div>
+                        <div class="divider-stat-value">2.107</div>
+                    </div>
+                    <div class="divider-stat">
+                        <div class="divider-stat-label">Cadeiras Externo</div>
+                        <div class="divider-stat-value">318</div>
+                    </div>
+                    <div class="divider-stat">
+                        <div class="divider-stat-label">% Interno</div>
+                        <div class="divider-stat-value">86.9%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-card col-span-2">
+            <div class="chart-title">Investimento em Mídia</div>
+            <div class="chart-content">
+                <div class="progress-section">
+                    <div class="progress-ring-container">
+                        <svg class="progress-ring" width="160" height="160">
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#00d4aa"/>
+                                    <stop offset="100%" stop-color="#ff3d8a"/>
+                                </linearGradient>
+                            </defs>
+                            <circle class="progress-ring-bg" cx="80" cy="80" r="65"/>
+                            <circle class="progress-ring-fill" cx="80" cy="80" r="65"/>
+                        </svg>
+                        <div class="progress-center">
+                            <div class="progress-percent">2.4x</div>
+                            <div class="progress-label">ROI</div>
+                        </div>
+                    </div>
+                    <div class="progress-info">
+                        <div class="progress-info-item">
+                            <div class="progress-info-dot cyan"></div>
+                            <div class="progress-info-text">Investimento: <span class="progress-info-value">R$ 710.826</span></div>
+                        </div>
+                        <div class="progress-info-item">
+                            <div class="progress-info-dot magenta"></div>
+                            <div class="progress-info-text">Purchases Mídia: <span class="progress-info-value">295</span></div>
+                        </div>
+                        <div class="progress-info-item">
+                            <div class="progress-info-dot cyan"></div>
+                            <div class="progress-info-text">CPV: <span class="progress-info-value">R$ 2.409,58</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="chart-card col-span-2">
+            <div class="chart-title">Cadeiras por Lote (Principais)</div>
+            <div class="chart-content">
+                <div class="lotes-grid">
+                    <div class="lote-item">
+                        <div class="lote-name">Bigger & Better</div>
+                        <div class="lote-value">840</div>
+                    </div>
+                    <div class="lote-item">
+                        <div class="lote-name">Black Week</div>
+                        <div class="lote-value">393</div>
+                    </div>
+                    <div class="lote-item">
+                        <div class="lote-name">Matriz V4</div>
+                        <div class="lote-value">279</div>
+                    </div>
+                    <div class="lote-item">
+                        <div class="lote-name">Lote 2</div>
+                        <div class="lote-value">249</div>
+                    </div>
+                    <div class="lote-item">
+                        <div class="lote-name">Lote 3</div>
+                        <div class="lote-value">206</div>
+                    </div>
+                    <div class="lote-item">
+                        <div class="lote-name">Lote 1</div>
+                        <div class="lote-value">128</div>
+                    </div>
+                    <div class="lote-item">
+                        <div class="lote-name">Lote 4</div>
+                        <div class="lote-value">116</div>
+                    </div>
+                    <div class="lote-item">
+                        <div class="lote-name">Outros</div>
+                        <div class="lote-value">214</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-card col-span-2">
+            <div class="chart-title">Cadeiras por Tipo de Ingresso</div>
+            <div class="chart-content">
+                <div class="tipo-grid">
+                    <div class="tipo-item">
+                        <div class="tipo-name">Classic</div>
+                        <div class="tipo-value cyan">1.005</div>
+                    </div>
+                    <div class="tipo-item">
+                        <div class="tipo-name">Plateia Alta</div>
+                        <div class="tipo-value magenta">551</div>
+                    </div>
+                    <div class="tipo-item">
+                        <div class="tipo-name">Parte Superior</div>
+                        <div class="tipo-value gold">346</div>
+                    </div>
+                    <div class="tipo-item">
+                        <div class="tipo-name">Classic - Plateia Baixa</div>
+                        <div class="tipo-value blue">292</div>
+                    </div>
+                    <div class="tipo-item">
+                        <div class="tipo-name">VIP</div>
+                        <div class="tipo-value orange">143</div>
+                    </div>
+                    <div class="tipo-item">
+                        <div class="tipo-name">Classic - Plateia Alta</div>
+                        <div class="tipo-value green">90</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="v4-logo">V4 COMPANY</div>
+            <div>Atualizado em: 21 de Janeiro de 2026</div>
+            <div>Live Marketing • Event-Led Growth</div>
+        </footer>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
